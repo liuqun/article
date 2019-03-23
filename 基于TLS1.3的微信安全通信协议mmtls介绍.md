@@ -81,7 +81,7 @@
 　　这样，我们基于`static_svr_pri_key`保护的数据就只有第一个业务数据包AppData，后续的包都是基于ES(Ephemeral Secret)对业务数据进行保护的。这样即使`static_svr_pri_key`泄露，也只有连接的第一个业务数据包能够被解密，提高前向安全性。
 
 　　同样的，0-RTT PSK密钥协商加密的数据的安全性依赖于长期保存密钥`ticket_key`，如果`ticket_key`泄露，那么所有基于`ticket_key`进行保护的数据都将失去保密性，因此同样可以在0-RTT PSK密钥协商的过程中，同时完成ECDHE密钥协商，提高前向安全性。
-### 3.2.2 密钥协商需要关注的细节###
+### 3.2.2 密钥协商需要关注的细节 ###
 　　根据前面的描述可以知道，要使得密钥协商过程不被中间人攻击，就必须要对协商数据进行认证。下面拿1-RTT ECDHE握手方式来说明在进行认证过程中需要注意的细节。在1-RTT ECDHE中的认证方式是使用ECDSA签名算法的非对称认证方式，整个过程大致如下：Server在收到客户端的`cli_pub_key`后，随机生成一对ECDH公私钥`（svr_pub_key, svr_pri_key）`，然后用签名密钥`sign_key`对`svr_pub_key`进行签名，得到签名值Signature，并把签名值Signature和`svr_pub_key`一起发送给客户端。客户端收到之后，用`verify_key`进行验签（`verify_key`和`sign_key`是一对ECDSA密钥），验签成功后才会继续走协商对称密钥的流程。
 
 　　上面的认证过程，有三个值得关注的点：
